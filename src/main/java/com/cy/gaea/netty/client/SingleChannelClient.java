@@ -131,4 +131,18 @@ public class SingleChannelClient extends NettyAbstract {
 		return channel;
 	}
 
+	@Override
+	public void start() throws Exception {
+
+	}
+
+	@Override
+	public void stop() {
+
+	}
+
+	@Override
+	public boolean isStarted() {
+		return false;
+	}
 }

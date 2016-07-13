@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by cy on 2016/7/10.
  */
-public abstract class NettyAbstract implements Transport {
+public abstract class NettyAbstract implements Transport , Service {
 
     // 异步回调 & 业务处理执行器
     protected ExecutorService serviceExecutor;
