@@ -1,4 +1,4 @@
-package com.cy.gaea.netty.event;
+package com.cy.gaea.gatty.netty.event;
 
 /**
  * Created by cy on 2016/7/10.

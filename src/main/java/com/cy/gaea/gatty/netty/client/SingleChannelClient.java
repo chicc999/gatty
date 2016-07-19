@@ -1,8 +1,8 @@
-package com.cy.gaea.netty.client;
+package com.cy.gaea.gatty.netty.client;
 
-import com.cy.gaea.exception.ConnectTimeoutException;
-import com.cy.gaea.netty.NettyAbstract;
-import com.cy.gaea.netty.config.NettyClientConfig;
+import com.cy.gaea.gatty.exception.ConnectTimeoutException;
+import com.cy.gaea.gatty.netty.NettyAbstract;
+import com.cy.gaea.gatty.netty.config.NettyClientConfig;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

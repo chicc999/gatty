@@ -1,10 +1,10 @@
-package com.cy.gaea.netty;
+package com.cy.gaea.gatty.netty;
 
 
 /**
  * 生命周期管理
  */
-public interface Service {
+public interface LifeCycle {
 
 	/**
 	 * 启动

@@ -1,7 +1,7 @@
-package com.cy.gaea.netty;
+package com.cy.gaea.gatty.netty;
 
-import com.cy.gaea.exception.RemotingIOException;
-import com.cy.gaea.protocol.Command;
+import com.cy.gaea.gatty.exception.RemotingIOException;
+import com.cy.gaea.gatty.protocol.Command;
 import io.netty.channel.Channel;
 
 /**

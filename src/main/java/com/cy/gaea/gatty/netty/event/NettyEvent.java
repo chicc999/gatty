@@ -1,4 +1,4 @@
-package com.cy.gaea.netty.event;
+package com.cy.gaea.gatty.netty.event;
 
 import io.netty.channel.Channel;
 

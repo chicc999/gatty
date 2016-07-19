@@ -1,4 +1,4 @@
-package com.cy.gaea.exception;
+package com.cy.gaea.gatty.exception;
 
 import java.net.SocketTimeoutException;
 

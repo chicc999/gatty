@@ -1,4 +1,4 @@
-package com.cy.gaea.eventmanager;
+package com.cy.gaea.gatty.eventmanager;
 
 /**
  * Created by cy on 2016/7/10.

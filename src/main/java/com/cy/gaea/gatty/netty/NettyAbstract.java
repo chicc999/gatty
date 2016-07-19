@@ -1,8 +1,8 @@
-package com.cy.gaea.netty;
+package com.cy.gaea.gatty.netty;
 
-import com.cy.gaea.exception.RemotingIOException;
-import com.cy.gaea.netty.config.NettyConfig;
-import com.cy.gaea.protocol.Command;
+import com.cy.gaea.gatty.exception.RemotingIOException;
+import com.cy.gaea.gatty.protocol.Command;
+import com.cy.gaea.gatty.netty.config.NettyConfig;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by cy on 2016/7/10.
  */
-public abstract class NettyAbstract implements Transport , Service {
+public abstract class NettyAbstract implements Transport , LifeCycle {
 
     // 异步回调 & 业务处理执行器
     protected ExecutorService serviceExecutor;
