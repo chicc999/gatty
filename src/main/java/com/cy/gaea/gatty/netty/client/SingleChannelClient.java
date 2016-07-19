@@ -131,18 +131,53 @@ public class SingleChannelClient extends NettyAbstract {
 		return channel;
 	}
 
-	@Override
-	public void start() throws Exception {
+
+	/**
+	 * 启动前
+	 *
+	 * @throws Exception
+	 */
+	protected void beforeStart() throws Exception {
 
 	}
 
-	@Override
-	public void stop() {
+	/**
+	 * 启动
+	 *
+	 * @throws Exception
+	 */
+	protected void doStart() throws Exception  {
 
 	}
 
+	/**
+	 * 启动后
+	 *
+	 * @throws Exception
+	 */
+	protected void afterStart() throws Exception  {
+
+	}
+
+	/**
+	 * 停止前
+	 */
+	protected void beforeStop()  {
+
+	}
+
+	/**
+	 * 停止
+	 */
+	protected void doStop()  {
+
+	}
+
+	/**
+	 * 停止后
+	 */
 	@Override
-	public boolean isStarted() {
-		return false;
+	protected void afterStop()  {
+
 	}
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by cy on 2016/7/10.
  */
-public abstract class NettyAbstract implements Transport , LifeCycle {
+public abstract class NettyAbstract extends Service implements Transport  {
 
     // 异步回调 & 业务处理执行器
     protected ExecutorService serviceExecutor;
@@ -48,5 +48,59 @@ public abstract class NettyAbstract implements Transport , LifeCycle {
     public ResponseFurture async(Channel channel, Command command, CommandCallback callback)
             throws RemotingIOException {
         return null;
+    }
+
+    /**
+     * 启动前
+     *
+     * @throws Exception
+     */
+    @Override
+    protected void beforeStart() throws Exception {
+
+    }
+
+    /**
+     * 启动
+     *
+     * @throws Exception
+     */
+    @Override
+    protected void doStart() throws Exception  {
+
+    }
+
+    /**
+     * 启动后
+     *
+     * @throws Exception
+     */
+    @Override
+    protected void afterStart() throws Exception  {
+
+    }
+
+    /**
+     * 停止前
+     */
+    @Override
+    protected void beforeStop()  {
+
+    }
+
+    /**
+     * 停止
+     */
+    @Override
+    protected void doStop()  {
+
+    }
+
+    /**
+     * 停止后
+     */
+    @Override
+    protected void afterStop()  {
+
     }
 }

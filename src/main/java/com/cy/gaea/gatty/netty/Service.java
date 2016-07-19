@@ -1,79 +1,112 @@
 package com.cy.gaea.gatty.netty;
 
+import com.cy.gaea.gatty.netty.client.SingleChannelClient;
+import com.cy.gaea.gatty.netty.config.NettyClientConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by cy on 2016/7/19.
  */
-abstract class Service implements LifeCycle{
+abstract class Service implements LifeCycle {
 
-	// 是否启动
-	protected final AtomicBoolean started = new AtomicBoolean(false);
+    Logger logger = LoggerFactory.getLogger(Service.class);
 
-	// 服务状态
-	protected final AtomicReference<ServiceState> serviceState = new AtomicReference<ServiceState>();
+    // 是否启动
+    protected final AtomicBoolean started = new AtomicBoolean(false);
 
-	@Override
-	public void start() throws Exception {
+    // 服务状态
+    protected final AtomicReference<ServiceState> serviceState =
+            new AtomicReference<ServiceState>();
 
-	}
+    @Override
+    public final void start() throws Exception {
+        serviceState.set(ServiceState.WILL_START);
+        beforeStart();
+        if (started.compareAndSet(false, true)) {
+            try {
+                serviceState.set(ServiceState.STARTING);
+                doStart();
+                afterStart();
+                serviceState.set(ServiceState.STARTED);
+            } catch (Exception e) {
+                serviceState.set(ServiceState.START_FAILED);
+                logger.error("启动失败", e);
+                stop();
+            }
+        }
+    }
 
-	@Override
-	public void stop() {
+    @Override
+    public final void stop() {
+        // 设置状态将要关闭
+        serviceState.set(ServiceState.WILL_STOP);
 
-	}
+        beforeStop();
 
-	@Override
-	public boolean isStarted() {
+        if (started.compareAndSet(true, false)) {
+            serviceState.set(ServiceState.STOPPING);
+            doStop();
+            afterStop();
+            serviceState.set(ServiceState.STOPPED);
+        }
+
+
+    }
+
+    @Override
+    public final boolean isStarted() {
+		//若没有启动，直接返回false
+		if (started.get()) {
+			switch (serviceState.get()) {
+				case WILL_STOP:
+				case STOPPING:
+				case STOPPED:
+					return false;
+				default:
+					return true;
+			}
+		}
 		return false;
-	}
+    }
 
-	/**
-	 * 启动前
-	 *
-	 * @throws Exception
-	 */
-	protected void beforeStart() throws Exception {
+    /**
+     * 启动前
+     *
+     * @throws Exception
+     */
+    abstract void beforeStart() throws Exception;
 
-	}
+    /**
+     * 启动
+     *
+     * @throws Exception
+     */
+    abstract void doStart() throws Exception;
 
-	/**
-	 * 启动
-	 *
-	 * @throws Exception
-	 */
-	protected void doStart() throws Exception {
+    /**
+     * 启动后
+     *
+     * @throws Exception
+     */
+    abstract void afterStart() throws Exception;
 
-	}
+    /**
+     * 停止前
+     */
+    abstract void beforeStop();
 
-	/**
-	 * 启动后
-	 *
-	 * @throws Exception
-	 */
-	protected void afterStart() throws Exception {
+    /**
+     * 停止
+     */
+    abstract void doStop();
 
-	}
+    /**
+     * 停止后
+     */
+    abstract void afterStop();
 
-	/**
-	 * 停止前
-	 */
-	protected void beforeStop() {
-
-	}
-
-	/**
-	 * 停止
-	 */
-	protected void doStop() {
-
-	}
-
-	/**
-	 * 停止后
-	 */
-	protected void afterStop() {
-
-	}
 }
