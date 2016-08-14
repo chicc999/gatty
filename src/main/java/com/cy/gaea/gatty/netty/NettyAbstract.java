@@ -3,10 +3,16 @@ package com.cy.gaea.gatty.netty;
 import com.cy.gaea.gatty.exception.RemotingIOException;
 import com.cy.gaea.gatty.protocol.Command;
 import com.cy.gaea.gatty.netty.config.NettyConfig;
+import com.cy.gaea.gatty.util.NamedThreadFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Created by cy on 2016/7/10.
@@ -21,7 +27,8 @@ public abstract class NettyAbstract extends Service implements Transport  {
     // IO处理线程池
     protected EventLoopGroup ioLoopGroup;
 
-
+    // 是否是内部创建的IO处理线程池
+    protected boolean createIoLoopGroup;
 
     public NettyAbstract(NettyConfig config) {
 		this(config,null,null);
@@ -68,6 +75,13 @@ public abstract class NettyAbstract extends Service implements Transport  {
     @Override
     protected void doStart() throws Exception  {
 
+        if (ioLoopGroup == null) {
+            ioLoopGroup = createEventLoopGroup(config.getWorkerThreads(), new NamedThreadFactory("IoLoopGroup"));
+            createIoLoopGroup = true;
+        }
+        serviceExecutor = Executors
+                .newFixedThreadPool(config.getCallbackExecutorThreads(), new NamedThreadFactory("AsyncCallback"));
+
     }
 
     /**
@@ -102,5 +116,19 @@ public abstract class NettyAbstract extends Service implements Transport  {
     @Override
     protected void afterStop()  {
 
+    }
+
+    /**
+     * 创建事件循环组，尽量共享
+     *
+     * @param threads       线程数
+     * @param threadFactory 线程工厂类
+     * @return 事件组
+     */
+    protected EventLoopGroup createEventLoopGroup(int threads, ThreadFactory threadFactory) {
+        if (config.isEpoll()) {
+            return new EpollEventLoopGroup(threads, threadFactory);
+        }
+        return new NioEventLoopGroup(threads, threadFactory);
     }
 }

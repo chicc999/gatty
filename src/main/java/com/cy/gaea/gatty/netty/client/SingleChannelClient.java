@@ -6,7 +6,10 @@ import com.cy.gaea.gatty.netty.config.NettyClientConfig;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +150,18 @@ public class SingleChannelClient extends NettyAbstract {
 	 * @throws Exception
 	 */
 	protected void doStart() throws Exception  {
-
+		super.doStart();
+		// Netty客户端启动器
+		bootstrap = new Bootstrap();
+		bootstrap.group(ioLoopGroup).channel(config.isEpoll() ? EpollSocketChannel.class : NioSocketChannel.class)
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+						((NettyClientConfig) config).getConnectionTimeout()).option(ChannelOption.TCP_NODELAY,
+				config.isTcpNoDelay())
+				.option(ChannelOption.SO_REUSEADDR, config.isReuseAddress())
+				.option(ChannelOption.SO_KEEPALIVE, config.isKeepAlive())
+				.option(ChannelOption.SO_LINGER, config.getSoLinger())
+				.option(ChannelOption.SO_RCVBUF, config.getSocketBufferSize())
+				.option(ChannelOption.SO_SNDBUF, config.getSocketBufferSize()).handler(new SingleChannelClientInitializer());
 	}
 
 	/**

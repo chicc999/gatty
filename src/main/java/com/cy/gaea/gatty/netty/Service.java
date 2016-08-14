@@ -1,7 +1,5 @@
 package com.cy.gaea.gatty.netty;
 
-import com.cy.gaea.gatty.netty.client.SingleChannelClient;
-import com.cy.gaea.gatty.netty.config.NettyClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
