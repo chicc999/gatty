@@ -1,0 +1,100 @@
+@startuml
+
+
+
+interface LifeCycle {
+	+ start() : void
+
+	+ stop() : void
+
+	+ isStarted() : boolean
+}
+
+interface Transport {
+	+ sync(Channel,Command) : Command
+
+	+ async(Channel,Command,CommandCallback) : ResponseFurture
+}
+
+abstract class Service implements LifeCycle {
+
+# started : AtomicBoolean
+
+# serviceState :AtomicReference<ServiceState>
+
++ abstract  beforeStart() : void
+
++ abstract doStart() : void
+
++ abstract afterStart() : void
+
++ abstract beforeStop() : void
+
++ abstract doStop() : void
+
++ abstract afterStop(): void
+
+}
+
+enum ServiceState {
+
+WILL_START
+
+STARTING
+
+START_FAILED
+
+STARTED
+
+WILL_STOP
+
+STOPPING
+
+STOPPED
+}
+
+
+
+class CommandCallback {
+}
+
+
+abstract class NettyAbstract extends Service implements Transport  {
+#serviceExecutor : ExecutorService
+#config : NettyConfig
+#ioLoopGroup : EventLoopGroup
+}
+
+
+
+
+
+
+class NettyConfig {
+}
+
+class NettyClientConfig extends NettyConfig{
+}
+
+class NettyServerConfig extends NettyConfig {
+}
+
+
+class Command {
+}
+class ResponseFurture {
+}
+
+class SingleChannelClient extends NettyAbstract {
+# bootstrap : Bootstrap
+
++ createChannel(SocketAddress) : Channel
+}
+
+
+Service *-- ServiceState
+NettyAbstract *-- NettyConfig
+Transport <.. Command
+Transport <.. ResponseFurture
+Transport <.. CommandCallback
+@enduml
