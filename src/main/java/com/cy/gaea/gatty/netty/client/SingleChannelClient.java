@@ -2,6 +2,7 @@ package com.cy.gaea.gatty.netty.client;
 
 import com.cy.gaea.gatty.exception.ConnectTimeoutException;
 import com.cy.gaea.gatty.netty.NettyAbstract;
+import com.cy.gaea.gatty.netty.ResponseFuture;
 import com.cy.gaea.gatty.netty.config.NettyClientConfig;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -28,6 +31,9 @@ public class SingleChannelClient extends NettyAbstract {
 
 	// Netty客户端启动器
 	protected Bootstrap bootstrap;
+
+	// 存放同步和异步命令应答
+	protected Map<String, ResponseFuture> futures = new ConcurrentHashMap<String, ResponseFuture>(100);
 
 	public SingleChannelClient(NettyClientConfig config) {
 		super(config);

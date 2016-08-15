@@ -11,7 +11,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -43,7 +42,7 @@ public abstract class NettyAbstract extends Service implements Transport  {
 
     @Override
     public Command sync(Channel channel, Command command) throws RemotingIOException {
-        return null;
+        return sync(channel,command,config.getSendTimeout());
     }
 
     @Override
@@ -52,7 +51,7 @@ public abstract class NettyAbstract extends Service implements Transport  {
     }
 
     @Override
-    public ResponseFurture async(Channel channel, Command command, CommandCallback callback)
+    public ResponseFuture async(Channel channel, Command command, CommandCallback callback)
             throws RemotingIOException {
         return null;
     }
@@ -107,6 +106,12 @@ public abstract class NettyAbstract extends Service implements Transport  {
      */
     @Override
     protected void doStop()  {
+        if (createIoLoopGroup) {
+            ioLoopGroup.shutdownGracefully();
+            ioLoopGroup = null;
+            createIoLoopGroup = false;
+        }
+        serviceExecutor.shutdown();
 
     }
 

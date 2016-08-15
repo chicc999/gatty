@@ -38,5 +38,5 @@ public interface Transport {
 	 * @return 异步执行的结果
 	 * @throws RemotingIOException
 	 */
-	ResponseFurture async(Channel channel, Command command, CommandCallback callback) throws RemotingIOException;
+	ResponseFuture async(Channel channel, Command command, CommandCallback callback) throws RemotingIOException;
 }
