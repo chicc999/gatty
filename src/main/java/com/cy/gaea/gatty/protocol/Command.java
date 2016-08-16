@@ -7,13 +7,13 @@ import java.util.UUID;
  * Created by cy on 2016/7/10.
  */
 public abstract class Command {
-	private String requestId;
+	private  String requestId;
 
 	public Command() {
 		this.requestId = UUID.randomUUID().toString();
 	}
 
-	public String getRequestId() {
+	public final String getRequestId() {
 		return requestId;
 	}
 
