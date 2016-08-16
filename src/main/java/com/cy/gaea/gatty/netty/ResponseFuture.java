@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,8 +24,6 @@ public class ResponseFuture {
 	private Throwable cause;
 	// 超时
 	private long timeout;
-	// 请求ID
-	private String requestId;
 	// 通道
 	private Channel channel;
 	// 回调
@@ -38,9 +35,7 @@ public class ResponseFuture {
 	// 是否释放
 	private AtomicBoolean released = new AtomicBoolean(false);
 	// 门闩
-	private CountDownLatch latch;
-	// 信号量
-	private Semaphore semaphore;
+	private CountDownLatch latch = new CountDownLatch(1);
 
 	/**
 	 * 异步调用构造函数
@@ -49,21 +44,15 @@ public class ResponseFuture {
 	 * @param request   请求
 	 * @param timeout   超时
 	 * @param callback  异步调用回调
-	 * @param semaphore 信号量
-	 * @param latch     门闩
 	 */
-	public ResponseFuture(Channel channel, Command request, long timeout, CommandCallback callback, Semaphore semaphore,
-						  CountDownLatch latch) {
+	public ResponseFuture(Channel channel, Command request, long timeout, CommandCallback callback) {
 		if (request == null) {
 			throw new IllegalArgumentException("request can not be null");
 		}
 		this.channel = channel;
 		this.request = request;
-		this.requestId = request.getRequestId();
 		this.timeout = timeout;
 		this.callback = callback;
-		this.semaphore = semaphore;
-		this.latch = latch;
 	}
 
 	public Command getRequest() {
@@ -91,7 +80,7 @@ public class ResponseFuture {
 	}
 
 	public String getRequestId() {
-		return requestId;
+		return this.request.getRequestId();
 	}
 
 	public CommandCallback getCallback() {
@@ -216,10 +205,6 @@ public class ResponseFuture {
 			// 释放请求资源
 			if (request != null) {
 				//request.release();
-			}
-			// 释放信号量
-			if (semaphore != null) {
-				semaphore.release();
 			}
 			// 唤醒同步等待线程
 			if (latch != null) {
