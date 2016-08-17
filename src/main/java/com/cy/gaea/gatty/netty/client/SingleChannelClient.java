@@ -1,9 +1,11 @@
 package com.cy.gaea.gatty.netty.client;
 
 import com.cy.gaea.gatty.exception.ConnectTimeoutException;
+import com.cy.gaea.gatty.exception.RequestTimeoutException;
 import com.cy.gaea.gatty.netty.NettyAbstract;
 import com.cy.gaea.gatty.netty.ResponseFuture;
 import com.cy.gaea.gatty.netty.config.NettyClientConfig;
+import com.cy.gaea.gatty.util.NamedThreadFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -11,14 +13,15 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.NetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.*;
 
 /**
  * Created by cy on 2016/7/12.
@@ -31,6 +34,9 @@ public class SingleChannelClient extends NettyAbstract {
 
 	// Netty客户端启动器
 	protected Bootstrap bootstrap;
+
+	//超期请求清理线程
+	ScheduledExecutorService cleanup ;
 
 	// 存放同步和异步命令应答
 	protected Map<String, ResponseFuture> futures = new ConcurrentHashMap<String, ResponseFuture>(100);
@@ -168,6 +174,41 @@ public class SingleChannelClient extends NettyAbstract {
 				.option(ChannelOption.SO_LINGER, config.getSoLinger())
 				.option(ChannelOption.SO_RCVBUF, config.getSocketBufferSize())
 				.option(ChannelOption.SO_SNDBUF, config.getSocketBufferSize()).handler(new SingleChannelClientInitializer());
+		cleanup =  Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("RequestCleanUp"));
+		cleanup.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				if (!isStarted()) {
+					return;
+				}
+				clearTimeoutFuture();
+			}
+		},1000*3,1000,TimeUnit.MILLISECONDS);
+	}
+
+	private void clearTimeoutFuture() {
+		Iterator<Map.Entry<String, ResponseFuture>> it = futures.entrySet().iterator();
+		Map.Entry<String, ResponseFuture> entry;
+		ResponseFuture responseFuture;
+		long timeout;
+		while (it.hasNext()) {
+			entry = it.next();
+			responseFuture = entry.getValue();
+			timeout = responseFuture.getBeginTime() + responseFuture.getTimeout() + 1000;
+
+			if (timeout <= System.currentTimeMillis()) {
+				it.remove();
+				if (responseFuture.release()) {
+					try {
+						responseFuture.onFailed(new RequestTimeoutException("请求RequestId = "+ responseFuture.getRequestId()+"超时，远程地址为"+responseFuture.getChannel().remoteAddress()));
+					} catch (Throwable e) {
+						logger.error("clear timeout response exception", e);
+					}
+					logger.info(String.format("remove timeout request id=%s begin=%d timeout=%d",
+							responseFuture.getRequestId(), responseFuture.getBeginTime(), timeout));
+				}
+			}
+		}
 	}
 
 	/**
