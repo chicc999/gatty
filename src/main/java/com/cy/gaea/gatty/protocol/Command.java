@@ -8,11 +8,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by cy on 2016/7/10.
  */
 public abstract class Command {
-	private  String requestId;
+	protected   String requestId;
 	private ConcurrentHashMap<String,String> header = new ConcurrentHashMap<String, String>();
 
-	public Command() {
+	protected Command() {
 		this.requestId = UUID.randomUUID().toString();
+	}
+
+	protected Command(String requestId) {
+		this.requestId = requestId;
 	}
 
 	public final String getRequestId() {

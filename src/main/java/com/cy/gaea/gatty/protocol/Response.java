@@ -7,6 +7,10 @@ import java.nio.ByteBuffer;
  */
 public class Response extends Command{
 
+	public Response(String requestId) {
+		super(requestId);
+	}
+
 	@Override
 	ByteBuffer encode() {
 		return null;
