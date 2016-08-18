@@ -231,6 +231,22 @@ public class SingleChannelClient extends NettyAbstract {
 	 * 停止
 	 */
 	protected void doStop()  {
+			super.doStop();
+		if(cleanup != null){
+			cleanup.shutdown();
+		}
+		// 关闭所有Future
+		ResponseFuture responseFuture;
+		for (Map.Entry<String, ResponseFuture> entry : futures.entrySet()) {
+			responseFuture = entry.getValue();
+			if (responseFuture.release()) {
+				try {
+					responseFuture.onFailed(new InterruptedException("服务被终止"));
+				} catch (Throwable ignored) {
+				}
+			}
+		}
+		futures.clear();
 
 	}
 
