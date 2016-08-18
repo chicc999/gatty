@@ -46,7 +46,25 @@ public abstract class NettyAbstract extends Service implements Transport  {
     }
 
     @Override
-    public Command sync(Channel channel, Command command, int timeout) throws RemotingIOException {
+    public Command sync(Channel channel, Command request, int timeout) throws RemotingIOException {
+        if (channel == null) {
+            throw new IllegalArgumentException("The argument channel must not be null");
+        }
+
+        if (request == null) {
+            throw new IllegalArgumentException("The argument command must not be null");
+        }
+        int sendTimeout = timeout <= 0 ? config.getSendTimeout() : timeout;
+        // 同步调用
+        ResponseFuture future = new ResponseFuture(channel,request,sendTimeout,null);
+        //写出请求
+        channel.writeAndFlush(request);
+        Command response;
+        try {
+            response = future.get(sendTimeout);
+        } catch (InterruptedException e) {
+            throw new RemotingIOException("线程被中断",e);
+        }
         return null;
     }
 

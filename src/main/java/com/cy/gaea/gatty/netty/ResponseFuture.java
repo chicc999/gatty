@@ -118,7 +118,7 @@ public class ResponseFuture {
 	 * @return 应答命令
 	 * @throws InterruptedException
 	 */
-	public Command await() throws InterruptedException {
+	public Command get() throws InterruptedException {
 		if (latch != null) {
 			latch.await(timeout, TimeUnit.MILLISECONDS);
 		}
@@ -132,7 +132,7 @@ public class ResponseFuture {
 	 * @return 应答命令
 	 * @throws InterruptedException
 	 */
-	public Command await(long timeout) throws InterruptedException {
+	public Command get(long timeout) throws InterruptedException {
 		if (latch != null) {
 			latch.await(timeout, TimeUnit.MILLISECONDS);
 		}
