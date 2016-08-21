@@ -29,7 +29,11 @@ public class ResponseFuture {
 	// 回调
 	private CommandCallback callback;
 	// 是否成功
-	private boolean success;
+	private boolean isSuccess;
+	//是否完成
+	private boolean isDone;
+	//是否完成
+	private boolean isCancel;
 	// 回调一次
 	private AtomicBoolean onceCallback = new AtomicBoolean(false);
 	// 是否释放
@@ -92,11 +96,11 @@ public class ResponseFuture {
 	}
 
 	public boolean isSuccess() {
-		return this.success;
+		return this.isSuccess;
 	}
 
-	public void setSuccess(boolean success) {
-		this.success = success;
+	public void setSuccess(boolean isSuccess) {
+		this.isSuccess = isSuccess;
 	}
 
 	public Channel getChannel() {
@@ -199,7 +203,7 @@ public class ResponseFuture {
 		if (released.compareAndSet(false, true)) {
 			// 设置了异常，则不成功
 			if (e != null) {
-				success = false;
+				isSuccess = false;
 				cause = e;
 			}
 			// 释放请求资源
@@ -220,4 +224,22 @@ public class ResponseFuture {
 		}
 		return false;
 	}
+
+	public boolean cancel() {
+		return false;
+	}
+
+	public boolean done() {
+
+		return true;
+	}
+
+	public boolean isCancelled() {
+		return false;
+	}
+
+	public boolean isDone() {
+		return false;
+	}
+
 }

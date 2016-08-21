@@ -46,19 +46,13 @@ public abstract class NettyAbstract extends Service implements Transport  {
     }
 
     @Override
-    public Command sync(Channel channel, Command request, int timeout) throws RemotingIOException {
-        if (channel == null) {
-            throw new IllegalArgumentException("The argument channel must not be null");
-        }
+    public Command sync(Channel channel, Command command, int timeout) throws RemotingIOException {
 
-        if (request == null) {
-            throw new IllegalArgumentException("The argument command must not be null");
-        }
         int sendTimeout = timeout <= 0 ? config.getSendTimeout() : timeout;
         // 同步调用
-        ResponseFuture future = new ResponseFuture(channel,request,sendTimeout,null);
+        ResponseFuture future = new ResponseFuture(channel,command,sendTimeout,null);
         //写出请求
-        channel.writeAndFlush(request);
+        channel.writeAndFlush(command);
         Command response;
         try {
             response = future.get(sendTimeout);
@@ -71,7 +65,23 @@ public abstract class NettyAbstract extends Service implements Transport  {
     @Override
     public ResponseFuture async(Channel channel, Command command, CommandCallback callback)
             throws RemotingIOException {
-        return null;
+        if (channel == null) {
+            throw new IllegalArgumentException("The argument channel must not be null");
+        }
+
+        if (command == null) {
+            throw new IllegalArgumentException("The argument command must not be null");
+        }
+
+        if (callback == null) {
+            throw new IllegalArgumentException("The argument callback must not be null");
+        }
+
+        // 同步调用
+        ResponseFuture future = new ResponseFuture(channel,command,0,callback);
+
+        channel.writeAndFlush(command);
+        return future;
     }
 
     /**
