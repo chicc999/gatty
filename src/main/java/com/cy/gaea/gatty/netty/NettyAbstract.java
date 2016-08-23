@@ -50,16 +50,15 @@ public abstract class NettyAbstract extends Service implements Transport  {
 
         int sendTimeout = timeout <= 0 ? config.getSendTimeout() : timeout;
         // 同步调用
-        ResponseFuture future = new ResponseFuture(channel,command,sendTimeout,null);
-        //写出请求
-        channel.writeAndFlush(command);
+        ResponseFuture future = async(channel,command,null);
+
         Command response;
         try {
             response = future.get(sendTimeout);
         } catch (InterruptedException e) {
             throw new RemotingIOException("线程被中断",e);
         }
-        return null;
+        return response;
     }
 
     @Override
