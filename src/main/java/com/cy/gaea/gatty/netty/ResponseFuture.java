@@ -38,6 +38,8 @@ public class ResponseFuture {
 	private AtomicBoolean onceCallback = new AtomicBoolean(false);
 	// 是否释放
 	private AtomicBoolean released = new AtomicBoolean(false);
+	//是否正在处理
+	private final AtomicBoolean isProcessed = new AtomicBoolean(false);
 	// 门闩
 	private CountDownLatch latch = new CountDownLatch(1);
 
@@ -57,6 +59,22 @@ public class ResponseFuture {
 		this.request = request;
 		this.timeout = timeout;
 		this.callback = callback;
+	}
+
+	/**
+	 * 异步调用构造函数
+	 *
+	 * @param channel   通道
+	 * @param request   请求
+	 * @param timeout   超时
+	 */
+	public ResponseFuture(Channel channel, Command request, long timeout) {
+		if (request == null) {
+			throw new IllegalArgumentException("request can not be null");
+		}
+		this.channel = channel;
+		this.request = request;
+		this.timeout = timeout;
 	}
 
 	public Command getRequest() {
@@ -116,18 +134,6 @@ public class ResponseFuture {
 		return System.currentTimeMillis() > beginTime + timeout;
 	}
 
-	/**
-	 * 阻塞并等待返回
-	 *
-	 * @return 应答命令
-	 * @throws InterruptedException
-	 */
-	public Command get() throws InterruptedException {
-		if (latch != null) {
-			latch.await(timeout, TimeUnit.MILLISECONDS);
-		}
-		return response;
-	}
 
 	/**
 	 * 等待返回
@@ -168,7 +174,7 @@ public class ResponseFuture {
 	/**
 	 * 确定成功
 	 */
-	public void onSuccess() {
+	private void onSuccess() {
 		setSuccess(true);
 		callback();
 	}
@@ -176,10 +182,31 @@ public class ResponseFuture {
 	/**
 	 * 确定失败
 	 */
-	public void onFailed(Throwable cause) {
+	private void onFailed(Throwable cause) {
 		setSuccess(false);
 		setCause(cause);
 		callback();
+	}
+
+
+	public boolean cancel(Throwable cause) {
+		if (isProcessed.getAndSet(true)) {
+			return false;
+		}
+		onFailed(cause);
+		isCancel = true;
+		latch.countDown();
+		return true;
+	}
+
+	public boolean done() {
+		if (isProcessed.getAndSet(true)) {
+			return false;
+		}
+		isDone = true;
+		latch.countDown();
+		onSuccess();
+		return true;
 	}
 
 	/**
@@ -225,21 +252,12 @@ public class ResponseFuture {
 		return false;
 	}
 
-	public boolean cancel() {
-		return false;
-	}
-
-	public boolean done() {
-
-		return true;
-	}
-
 	public boolean isCancelled() {
-		return false;
+		return isCancel;
 	}
 
 	public boolean isDone() {
-		return false;
+		return isDone;
 	}
 
 }
